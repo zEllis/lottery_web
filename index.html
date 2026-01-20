@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎰 Lottery - 彩票中奖检查</title>
+    <!-- 配置文件 -->
+    <script src="config.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        /* 登录界面 */
+        .login-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 400px;
+            margin: 100px auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .login-card h2 {
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logout-btn {
+            font-size: 0.8em;
+            padding: 6px 12px;
+            background: #f56565;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9em;
+        }
+
+        /* 号码组 */
+        .number-groups {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .number-group {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 3px solid #667eea;
+        }
+
+        .number-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .number-input {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .number-input input {
+            width: 60px;
+            text-align: center;
+        }
+
+        .copies-input {
+            width: 80px;
+            display: inline-block;
+        }
+
+        .ticket-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .ticket-item {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .ticket-item h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .ticket-numbers {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        .ticket-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .ticket-actions button {
+            flex: 1;
+            padding: 8px;
+            font-size: 0.9em;
+        }
+
+        /* 历史开奖 */
+        .draw-history {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .draw-item {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid #667eea;
+        }
+
+        .draw-item h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #c6f6d5;
+            color: #2f855a;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .ticket-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 登录界面 -->
+        <div id="loginSection" class="login-card">
+            <h2>🎰 Lottery</h2>
+            <p style="color: #666; margin-bottom: 20px;">请输入 Token 登录</p>
+            <input type="password" id="tokenInput" placeholder="请输入 Token">
+            <button onclick="login()" class="btn btn-primary" style="width: 100%;">登录</button>
+        </div>
+
+        <!-- 主界面 -->
+        <div id="mainSection" class="hidden">
+            <div class="header">
+                <h1>🎰 Lottery</h1>
+                <p>彩票中奖检查工具</p>
+            </div>
+
+            <div id="message"></div>
+
+            <!-- 添加彩票号码 -->
+            <div class="card">
+                <h2 class="card-title">
+                    ➕ 添加彩票号码
+                    <button onclick="logout()" class="logout-btn">退出登录</button>
+                </h2>
+                <form id="addTicketForm">
+                    <div class="form-group">
+                        <label>彩票类型</label>
+                        <select id="lotteryType" required>
+                            <option value="ssq">双色球</option>
+                            <option value="dlt">大乐透</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>拥有者</label>
+                        <select id="owner" required>
+                            <!-- 动态加载 -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>号码组（可添加多组）</label>
+                        <div id="numberGroups" class="number-groups">
+                            <!-- 动态添加号码组 -->
+                        </div>
+                        <button type="button" onclick="addNumberGroup()" class="btn btn-primary btn-small">
+                            ➕ 添加号码组
+                        </button>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">💾 保存所有号码</button>
+                </form>
+            </div>
+
+            <!-- 彩票列表 -->
+            <div class="card">
+                <h2 class="card-title">📋 我的彩票</h2>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: inline-block; margin-right: 10px;">选择拥有者：</label>
+                    <select id="ownerFilter" onchange="loadTickets()" style="padding: 8px; border-radius: 4px;">
+                        <!-- 动态加载 -->
+                    </select>
+                    <button onclick="loadTickets()" class="btn btn-primary btn-small" style="margin-left: 10px;">
+                        🔄 刷新
+                    </button>
+                    <button onclick="checkNow()" class="btn btn-success btn-small">🎯 立即检查</button>
+                </div>
+                <div id="ticketList" class="loading">请选择拥有者</div>
+            </div>
+
+            <!-- 最新开奖结果 -->
+            <div class="card">
+                <h2 class="card-title">🎲 开奖结果</h2>
+                <div style="margin-bottom: 15px;">
+                    <button onclick="loadLatestDraw('ssq')" class="btn btn-primary btn-small">双色球最新</button>
+                    <button onclick="loadLatestDraw('dlt')" class="btn btn-primary btn-small">大乐透最新</button>
+                    <button onclick="loadDrawHistory('ssq')" class="btn btn-primary btn-small">双色球历史</button>
+                    <button onclick="loadDrawHistory('dlt')" class="btn btn-primary btn-small">大乐透历史</button>
+                </div>
+                <div id="drawResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 从配置文件读取 API URL
+        const API_URL = LotteryConfig.apiUrl;
+        console.log('API URL:', API_URL);
+
+        let API_TOKEN = '';
+        let OWNERS = [];
+        let currentLotteryType = 'ssq';  // 默认双色球
+
+        // 彩票类型配置
+        const lotteryConfig = {
+            ssq: {
+                name: '双色球',
+                frontName: '红球',
+                backName: '蓝球',
+                frontCount: 6,
+                backCount: 1,
+                frontMax: 33,
+                backMax: 16
+            },
+            dlt: {
+                name: '大乐透',
+                frontName: '前区',
+                backName: '后区',
+                frontCount: 5,
+                backCount: 2,
+                frontMax: 35,
+                backMax: 12
+            }
+        };
+
+        let numberGroupCounter = 0;
+
+        // 登录
+        async function login() {
+            const token = document.getElementById('tokenInput').value.trim();
+            if (!token) {
+                alert('请输入 Token');
+                return;
+            }
+
+            API_TOKEN = token;
+
+            // 验证 Token
+            try {
+                console.log('正在连接 API 服务器...', API_URL);
+                await apiRequest('/health');
+                console.log('API 连接成功');
+
+                // 获取拥有者列表
+                await loadOwners();
+                console.log('拥有者列表加载成功');
+
+                // 保存 Token
+                localStorage.setItem('lottery_token', token);
+
+                // 显示主界面
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('mainSection').classList.remove('hidden');
+
+                // 初始化
+                initOwnerSelects();
+                addNumberGroup();
+                updateNumberInputs();
+            } catch (error) {
+                console.error('登录失败:', error);
+                alert('登录失败！\n\n可能的原因：\n1. API 服务未启动\n2. Token 错误\n3. 网络连接问题\n\n详细错误: ' + error.message);
+            }
+        }
+
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('lottery_token');
+            API_TOKEN = '';
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('mainSection').classList.add('hidden');
+            document.getElementById('tokenInput').value = '';
+        }
+
+        // 页面加载时检查 Token
+        window.onload = function () {
+            const savedToken = localStorage.getItem('lottery_token');
+            if (savedToken) {
+                document.getElementById('tokenInput').value = savedToken;
+                login();
+            }
+        };
+
+        // 获取拥有者列表
+        async function loadOwners() {
+            try {
+                OWNERS = await apiRequest('/api/config/owners');
+            } catch (error) {
+                console.error('获取拥有者列表失败:', error);
+                // 使用默认列表
+                OWNERS = ['张灿', '李四', '王五'];
+            }
+        }
+
+        // 初始化拥有者选择框
+        function initOwnerSelects() {
+            const ownerSelect = document.getElementById('owner');
+            const ownerFilter = document.getElementById('ownerFilter');
+
+            ownerSelect.innerHTML = '';
+            ownerFilter.innerHTML = '<option value="">-- 请选择 --</option>';
+
+            OWNERS.forEach(owner => {
+                const option1 = document.createElement('option');
+                option1.value = owner;
+                option1.textContent = owner;
+                ownerSelect.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = owner;
+                option2.textContent = owner;
+                ownerFilter.appendChild(option2);
+            });
+        }
+
+        // 添加号码组
+        function addNumberGroup() {
+            const container = document.getElementById('numberGroups');
+            const groupId = ++numberGroupCounter;
+            const lotteryType = document.getElementById('lotteryType').value;
+            const config = lotteryConfig[lotteryType];
+
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'number-group';
+            groupDiv.id = `group-${groupId}`;
+
+            groupDiv.innerHTML = `
+                <div class="number-group-header">
+                    <strong>号码组 ${groupId}</strong>
+                    <button type="button" onclick="removeNumberGroup(${groupId})" class="btn btn-danger btn-small">
+                        删除
+                    </button>
+                </div>
+                <div class="form-group">
+                    <label>${config.frontName}（${config.frontCount}个）</label>
+                    <div class="number-input" data-type="front">
+                        ${Array(config.frontCount).fill(0).map(() =>
+                `<input type="number" min="1" max="${config.frontMax}" required>`
+            ).join('')}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>${config.backName}（${config.backCount}个）</label>
+                    <div class="number-input" data-type="back">
+                        ${Array(config.backCount).fill(0).map(() =>
+                `<input type="number" min="1" max="${config.backMax}" required>`
+            ).join('')}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>注数</label>
+                    <input type="number" class="copies-input" min="1" value="1" data-copies="true" required>
+                    <span style="color: #666; margin-left: 10px;">注</span>
+                </div>
+            `;
+
+            container.appendChild(groupDiv);
+        }
+
+        // 删除号码组
+        function removeNumberGroup(groupId) {
+            const group = document.getElementById(`group-${groupId}`);
+            if (group) {
+                group.remove();
+            }
+        }
+
+        // 切换彩票类型
+        document.getElementById('lotteryType').addEventListener('change', function () {
+            // 清空并重新添加号码组
+            document.getElementById('numberGroups').innerHTML = '';
+            numberGroupCounter = 0;
+            addNumberGroup();
+        });
+
+        // 更新号码输入框
+        function updateNumberInputs() {
+            const type = document.getElementById('lotteryType').value;
+            const config = lotteryConfig[type];
+
+            // 更新所有号码组
+            document.querySelectorAll('.number-group').forEach(group => {
+                const frontDiv = group.querySelector('[data-type="front"]');
+                const backDiv = group.querySelector('[data-type="back"]');
+
+                frontDiv.innerHTML = Array(config.frontCount).fill(0).map(() =>
+                    `<input type="number" min="1" max="${config.frontMax}" required>`
+                ).join('');
+
+                backDiv.innerHTML = Array(config.backCount).fill(0).map(() =>
+                    `<input type="number" min="1" max="${config.backMax}" required>`
+                ).join('');
+            });
+        }
+
+        // 显示消息
+        function showMessage(message, type = 'success') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            setTimeout(() => {
+                messageDiv.textContent = '';
+                messageDiv.className = '';
+            }, 3000);
+        }
+
+        // API 请求
+        async function apiRequest(url, options = {}) {
+            const headers = {
+                'Authorization': `Bearer ${API_TOKEN}`,
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+
+            try {
+                const response = await fetch(`${API_URL}${url}`, {
+                    ...options,
+                    headers,
+                    mode: 'cors',  // 明确指定 CORS 模式
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || '请求失败');
+                }
+
+                return data.data;
+            } catch (error) {
+                console.error('API 请求失败:', url, error);
+                throw error;
+            }
+        }
+
+        // 添加彩票
+        document.getElementById('addTicketForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const lotteryType = document.getElementById('lotteryType').value;
+            const owner = document.getElementById('owner').value;
+
+            // 获取所有号码组
+            const groups = document.querySelectorAll('.number-group');
+
+            if (groups.length === 0) {
+                showMessage('请至少添加一组号码', 'error');
+                return;
+            }
+
+            try {
+                let successCount = 0;
+
+                for (const group of groups) {
+                    const frontInputs = group.querySelectorAll('[data-type="front"] input');
+                    const backInputs = group.querySelectorAll('[data-type="back"] input');
+                    const copiesInput = group.querySelector('[data-copies]');
+
+                    const frontNumbers = Array.from(frontInputs).map(input => parseInt(input.value));
+                    const backNumbers = Array.from(backInputs).map(input => parseInt(input.value));
+                    const copies = parseInt(copiesInput.value);
+
+                    await apiRequest('/api/tickets', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            lottery_type: lotteryType,
+                            owner,
+                            front_numbers: frontNumbers,
+                            back_numbers: backNumbers,
+                            notes: `${copies}注`
+                        })
+                    });
+
+                    successCount++;
+                }
+
+                showMessage(`✅ 成功添加 ${successCount} 组彩票！`, 'success');
+                this.reset();
+                document.getElementById('numberGroups').innerHTML = '';
+                numberGroupCounter = 0;
+                addNumberGroup();
+                loadTickets();
+            } catch (error) {
+                showMessage(`❌ ${error.message}`, 'error');
+            }
+        });
+
+        // 加载彩票列表
+        async function loadTickets() {
+            const owner = document.getElementById('ownerFilter').value;
+            const listDiv = document.getElementById('ticketList');
+
+            if (!owner) {
+                listDiv.innerHTML = '<p style="text-align: center; color: #999;">请选择拥有者</p>';
+                return;
+            }
+
+            listDiv.innerHTML = '<div class="loading">加载中...</div>';
+
+            try {
+                const tickets = await apiRequest(`/api/tickets?owner=${owner}`);
+
+                if (tickets.length === 0) {
+                    listDiv.innerHTML = '<p style="text-align: center; color: #999;">暂无彩票</p>';
+                    return;
+                }
+
+                listDiv.innerHTML = '';
+                const container = document.createElement('div');
+                container.className = 'ticket-list';
+
+                tickets.forEach(ticket => {
+                    const config = lotteryConfig[ticket.lottery_type];
+                    const item = document.createElement('div');
+                    item.className = 'ticket-item';
+
+                    const frontNumbers = ticket.front_numbers.map(n => n.toString().padStart(2, '0')).join(', ');
+                    const backNumbers = ticket.back_numbers.map(n => n.toString().padStart(2, '0')).join(', ');
+
+                    item.innerHTML = `
+                        <h3>${config.name}</h3>
+                        <div class="ticket-numbers">
+                            ${config.frontName}: ${frontNumbers}<br>
+                            ${config.backName}: ${backNumbers}
+                        </div>
+                        <p style="color: #666; font-size: 0.9em;">${ticket.notes || '无备注'}</p>
+                        <div class="ticket-actions">
+                            <button class="btn btn-danger" onclick="deleteTicket('${ticket.ticket_id}')">删除</button>
+                        </div>
+                    `;
+
+                    container.appendChild(item);
+                });
+
+                listDiv.appendChild(container);
+            } catch (error) {
+                listDiv.innerHTML = `<p class="error">加载失败: ${error.message}</p>`;
+            }
+        }
+
+        // 删除彩票
+        async function deleteTicket(ticketId) {
+            if (!confirm('确定要删除这张彩票吗？')) return;
+
+            try {
+                await apiRequest(`/api/tickets/${ticketId}`, {
+                    method: 'DELETE'
+                });
+
+                showMessage('✅ 彩票删除成功！', 'success');
+                loadTickets();
+            } catch (error) {
+                showMessage(`❌ ${error.message}`, 'error');
+            }
+        }
+
+        // 立即检查
+        async function checkNow() {
+            const owner = document.getElementById('ownerFilter').value;
+            if (!owner) {
+                showMessage('❌ 请先选择拥有者', 'error');
+                return;
+            }
+
+            try {
+                showMessage('🔄 正在检查...', 'success');
+
+                const result = await apiRequest('/api/check/web', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        lottery_type: currentLotteryType,
+                        owner: owner
+                    })
+                });
+
+                console.log('检查结果:', result);  // 调试日志
+
+                // 验证返回数据
+                if (!result || !result.draw || !result.results) {
+                    console.error('返回数据格式错误:', result);
+                    showMessage('❌ 返回数据格式错误', 'error');
+                    return;
+                }
+
+                // 显示检查结果
+                displayCheckResults(result);
+            } catch (error) {
+                console.error('检查失败:', error);
+                showMessage(`❌ ${error.message}`, 'error');
+            }
+        }
+
+        // 显示检查结果
+        function displayCheckResults(data) {
+            try {
+                const { draw, results, count } = data;
+
+                if (!draw || !results) {
+                    console.error('数据不完整:', data);
+                    showMessage('❌ 数据不完整', 'error');
+                    return;
+                }
+
+                const config = lotteryConfig[draw.lottery_type];
+                if (!config) {
+                    console.error('未知的彩票类型:', draw.lottery_type);
+                    showMessage('❌ 未知的彩票类型', 'error');
+                    return;
+                }
+
+                let winningCount = 0;
+                let resultHtml = `
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="margin: 0 0 10px 0;">🎲 ${config.name} ${draw.code}期</h3>
+                        <div style="font-size: 1.1em; font-weight: bold; color: #333;">
+                            ${config.frontName}: ${draw.front_numbers.map(n => String(n).padStart(2, '0')).join(', ')} | 
+                            ${config.backName}: ${draw.back_numbers.map(n => String(n).padStart(2, '0')).join(', ')}
+                        </div>
+                        <div style="color: #666; margin-top: 5px;">开奖日期: ${draw.date}</div>
+                    </div>
+                    <h3 style="margin: 20px 0 10px 0;">检查结果 (共 ${count} 组)</h3>
+                `;
+
+                results.forEach((result, index) => {
+                    const isWinning = result.prize !== null && result.prize !== undefined;
+                    if (isWinning) winningCount++;
+
+                    const bgColor = isWinning ? '#fff3cd' : '#f8f9fa';
+                    const borderColor = isWinning ? '#ffc107' : '#dee2e6';
+                    const prizeText = isWinning ? `<strong style="color: #d63031; font-size: 1.2em;">🎉 ${result.prize}</strong>` : '<span style="color: #999;">未中奖</span>';
+
+                    resultHtml += `
+                    <div style="background: ${bgColor}; border: 2px solid ${borderColor}; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="font-weight: bold;">第 ${index + 1} 组</span>
+                            ${prizeText}
+                        </div>
+                        <div style="color: #666;">
+                            ${config.frontName}: ${result.ticket_front_numbers.map(n => String(n).padStart(2, '0')).join(', ')} | 
+                            ${config.backName}: ${result.ticket_back_numbers.map(n => String(n).padStart(2, '0')).join(', ')}
+                        </div>
+                        <div style="color: #999; font-size: 0.9em; margin-top: 5px;">
+                            匹配: ${config.frontName} ${result.front_match_count}/${result.ticket_front_numbers.length} | 
+                            ${config.backName} ${result.back_match_count}/${result.ticket_back_numbers.length}
+                        </div>
+                    </div>
+                `;
+                });
+
+                if (winningCount > 0) {
+                    showMessage(`🎉 恭喜！有 ${winningCount} 组中奖！`, 'success');
+                } else {
+                    showMessage('未中奖，继续加油！', 'info');
+                }
+
+                // 显示在开奖结果区域
+                const resultDiv = document.getElementById('drawResult');
+                if (!resultDiv) {
+                    console.error('找不到 drawResult 元素');
+                    return;
+                }
+                resultDiv.innerHTML = resultHtml;
+
+                console.log('检查结果已显示');
+            } catch (error) {
+                console.error('显示检查结果失败:', error);
+                showMessage(`❌ 显示结果失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 加载最新开奖结果
+        async function loadLatestDraw(lotteryType) {
+            const resultDiv = document.getElementById('drawResult');
+            resultDiv.innerHTML = '<div class="loading">加载中...</div>';
+
+            try {
+                const draw = await apiRequest(`/api/draws/latest/${lotteryType}`);
+                const config = lotteryConfig[lotteryType];
+
+                const frontNumbers = draw.front_numbers.map(n => n.toString().padStart(2, '0')).join(', ');
+                const backNumbers = draw.back_numbers.map(n => n.toString().padStart(2, '0')).join(', ');
+
+                // 使用表格展示最新开奖
+                resultDiv.innerHTML = `
+                    <h3 style="margin-bottom: 15px;">${config.name} 最新开奖</h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                            <thead>
+                                <tr style="background-color: #f5f5f5; border-bottom: 2px solid #ddd;">
+                                    <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">期号</th>
+                                    <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">日期</th>
+                                    <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">${config.frontName}</th>
+                                    <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">${config.backName}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background-color: #fff;">
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd; font-weight: bold; font-size: 16px;">${draw.code}</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">${draw.date}</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd; color: #e74c3c; font-weight: bold; font-size: 16px;">${frontNumbers}</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd; color: #3498db; font-weight: bold; font-size: 16px;">${backNumbers}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">加载失败: ${error.message}</p>`;
+            }
+        }
+
+        // 加载历史开奖结果
+        async function loadDrawHistory(lotteryType) {
+            const resultDiv = document.getElementById('drawResult');
+            resultDiv.innerHTML = '<div class="loading">加载中...</div>';
+
+            try {
+                const draws = await apiRequest(`/api/draws?lottery_type=${lotteryType}&limit=10`);
+                const config = lotteryConfig[lotteryType];
+
+                if (draws.length === 0) {
+                    resultDiv.innerHTML = '<p style="text-align: center; color: #999;">暂无历史记录</p>';
+                    return;
+                }
+
+                // 使用表格展示，更紧凑
+                let tableHTML = `
+                    <h3 style="margin-bottom: 15px;">${config.name} 最近10期</h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                            <thead>
+                                <tr style="background-color: #f5f5f5; border-bottom: 2px solid #ddd;">
+                                    <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">期号</th>
+                                    <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">日期</th>
+                                    <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">${config.frontName}</th>
+                                    <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">${config.backName}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                draws.forEach((draw, index) => {
+                    const frontNumbers = draw.front_numbers.map(n => n.toString().padStart(2, '0')).join(', ');
+                    const backNumbers = draw.back_numbers.map(n => n.toString().padStart(2, '0')).join(', ');
+                    const bgColor = index % 2 === 0 ? '#fff' : '#f9f9f9';
+
+                    tableHTML += `
+                        <tr style="background-color: ${bgColor};">
+                            <td style="padding: 8px; text-align: center; border: 1px solid #ddd; font-weight: bold;">${draw.code}</td>
+                            <td style="padding: 8px; text-align: center; border: 1px solid #ddd;">${draw.date}</td>
+                            <td style="padding: 8px; text-align: center; border: 1px solid #ddd; color: #e74c3c; font-weight: bold;">${frontNumbers}</td>
+                            <td style="padding: 8px; text-align: center; border: 1px solid #ddd; color: #3498db; font-weight: bold;">${backNumbers}</td>
+                        </tr>
+                    `;
+                });
+
+                tableHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                resultDiv.innerHTML = tableHTML;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">加载失败: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+
+</html>
